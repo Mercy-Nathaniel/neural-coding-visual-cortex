@@ -76,4 +76,4 @@ All analysis is performed in Jupyter notebooks with fully reproducible code. Dat
 ## Author
 
 Mercy Nathaniel  
-Transitioning into Computational Neuroscience
+ 
