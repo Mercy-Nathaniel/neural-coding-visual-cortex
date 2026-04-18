@@ -1,30 +1,79 @@
-# neural-coding-visual-cortex
-Title: Neural Coding in Visual Cortex Using Spike Data
+# Neural Coding in Visual Cortex Using Spike Data
 
-Project Overview
+## Overview
 
-This project analyzes large-scale electrophysiology data from the Allen Institute for Brain Science to investigate how neurons in different visual cortical areas encode sensory stimuli.
+This project investigates how populations of neurons in the visual cortex encode sensory stimuli using large-scale extracellular electrophysiology data. The goal is to understand how neural activity patterns differ across cortical regions and how these differences relate to stimulus encoding.
 
-Research Question
+This work is part of my transition into computational neuroscience, focusing on structure–function relationships in cortical circuits.
 
-How do neurons across cortical areas differ in their encoding of visual stimuli?
+---
 
-Methods
+## Scientific Motivation
 
-Spike data from Neuropixels recordings
-Analysis performed in Python
-Computation of firing rates and tuning properties
-Results (you’ll update later)
-Spike train visualization
-Firing rate distributions
-Orientation tuning curves
+A central question in systems neuroscience is how sensory information is represented in distributed neural populations. While it is well established that neurons in early visual areas are highly selective for basic stimulus features, less is understood about how encoding properties change across cortical hierarchy in large-scale neural recordings.
 
-Tools
+This project explores these differences using real spike data from the Allen Brain Observatory.
 
-Python
-NumPy
-Matplotlib
-AllenSDK
+---
 
-Author
-Mercy Nathaniel
+## Data
+
+Data is obtained from the Allen Brain Observatory, a large-scale electrophysiology dataset provided by the Allen Institute for Brain Science. The dataset contains Neuropixels recordings from visual cortical areas during presentation of controlled visual stimuli such as drifting gratings.
+
+---
+
+## Methods
+
+Analysis is performed in Python using standard scientific computing tools.
+
+Steps include:
+
+- Loading electrophysiology session data
+- Extracting spike times from single units
+- Computing firing rates
+- Visualizing spike trains
+- (In progress) Constructing tuning curves for stimulus encoding
+
+---
+
+## Current Progress
+
+- Successfully loaded raw spike data from Neuropixels recordings  
+- Extracted spike trains from individual neurons  
+- Visualized neuronal firing activity over time  
+
+Further analysis will focus on comparing encoding properties across cortical areas.
+
+---
+
+## Tools
+
+- Python  
+- NumPy  
+- Matplotlib  
+- Pandas  
+- AllenSDK  
+- Jupyter Notebook  
+- Git / GitHub  
+
+---
+
+## Reproducibility
+
+All analysis is performed in Jupyter notebooks with fully reproducible code. Data is loaded directly from the Allen Brain Observatory cache system.
+
+---
+
+## Future Work
+
+- Compute orientation tuning curves  
+- Compare firing rate distributions across cortical areas  
+- Quantify variability in neural responses  
+- Extend analysis to population-level coding models  
+
+---
+
+## Author
+
+Mercy Nathaniel  
+Transitioning into Computational Neuroscience
