@@ -1,430 +1,349 @@
-# RESEARCH_TIMELINE.md - 5-Week Neural Coding Research Plan
+# Neural Coding Research Timeline (5 Weeks)
 
-Your structured research roadmap for May 1-31, 2026.
-
----
-
-## Overview
-
-This timeline parallels your RNA-seq learning. Both projects build toward integration by June.
-
-**Goal:** Analyze neural encoding in visual cortex → Identify high-encoding neurons → Connect to transcriptomics
+**Project**: Neural Coding in Visual Cortex Using Allen Brain Observatory
+**Timeline**: April 25 - May 31, 2026 (36 days)
+**Goal**: Complete multi-area neural encoding analysis with population-level insights
 
 ---
 
-## Week 1: Data Exploration & Spike Train Analysis (May 1-7)
+## Week 1: Setup & Data Exploration (Apr 25 - May 1)
 
-### Learning Outcomes
-- Load Allen Brain Observatory data smoothly
-- Understand spike timing and neural activity patterns
-- Visualize firing across different brain areas
-- Select sessions for detailed analysis
+### Objectives
+- Install AllenSDK and dependencies
+- Load data from Allen Brain Observatory
+- Explore spike data structure
+- Visualize neural activity
 
 ### Tasks
-- [ ] Complete `ALLEN_QUICKSTART.md` installation
-- [ ] Load 3 different sessions with drifting gratings
-- [ ] Plot spike raster plots for 50 units per session
-- [ ] Calculate basic firing rates across brain areas
-- [ ] Document which sessions are best for analysis
+- [ ] Complete SETUP.md installation (requirements.txt)
+- [ ] Read ALLEN_QUICKSTART.md thoroughly
+- [ ] Run: Load first session data
+- [ ] Notebook: 00_setup_and_verification.ipynb
+- [ ] Notebook: 01_explore_spike_data.ipynb
 
-### Code Template
-
+### Code Tasks
 ```python
-from allensdk.brain_observatory.ecephys.manifest import EcephysProjectCache
-import matplotlib.pyplot as plt
+# Week 1 Challenge: Load data and create first visualizations
+from allensdk.brain_observatory.ecephys.ecephys_project_cache import EcephysProjectCache
+
+cache = EcephysProjectCache(manifest_path='manifest.json')
+sessions = cache.get_sessions()
+session = cache.get_session_data(session_id=sessions.iloc[0]['id'])
+
+# Questions to answer:
+# 1. How many neurons are in this session?
+# 2. What brain areas are represented?
+# 3. What's the range of firing rates?
+# 4. How long is the recording?
+```
+
+**Deliverable**: 
+- README file documenting your first session
+- Basic statistics plot (firing rate distribution)
+- Spike raster visualization for 5 neurons
+
+---
+
+## Week 2: Firing Rate Analysis & Cross-Area Comparison (May 2-8)
+
+### Objectives
+- Compute firing rates across stimulus types
+- Compare neural activity across cortical areas
+- Analyze response variability
+- Understand stimulus effects on firing
+
+### Tasks
+- [ ] Notebook: 02_firing_rate_computation.ipynb
+- [ ] Notebook: 03_cross_area_comparison.ipynb
+- [ ] Analyze: Response to different stimulus types
+- [ ] Create: Box plots comparing areas (VISp, VISl, VISrl)
+
+### Code Tasks
+```python
+# Week 2 Challenge: Firing rate analysis pipeline
+
 import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 
-# Initialize
-cache = EcephysProjectCache(manifest_file='ecephys_cache/manifest.json')
-sessions = cache.get_session_table()
+# For each stimulus type, compute:
+# 1. Mean firing rate per neuron
+# 2. Firing rate variance
+# 3. Peak firing rates
+# 4. Response latency
 
-# Load first good session
-session_id = sessions[sessions['has_drifting_gratings']].index[0]
-session = cache.get_session_data(session_id)
-
-spike_times = session.spike_times
-unit_ids = session.units.index.values
-
-# Plot raster for first 50 units
-fig, ax = plt.subplots(figsize=(12, 8))
-for idx, unit_id in enumerate(unit_ids[:50]):
-    spikes = spike_times[unit_id]
-    ax.vlines(spikes, idx - 0.5, idx + 0.5, color='black', linewidth=0.5)
-
-ax.set_ylim(-1, 50)
-ax.set_xlabel('Time (s)')
-ax.set_ylabel('Unit ID')
-ax.set_title(f'Spike Raster - Session {session_id}')
-plt.tight_layout()
-plt.savefig('results/figures/01_spike_raster.png', dpi=150)
-plt.close()
-
-# Firing rates
-firing_rates = []
-for unit_id in unit_ids:
-    spikes = spike_times[unit_id]
-    total_time = session.stimulus_timestamps[-1]
-    fr = len(spikes) / total_time
-    firing_rates.append(fr)
-
-print(f"Mean firing rate: {np.mean(firing_rates):.2f} Hz")
-print(f"Range: {np.min(firing_rates):.2f} - {np.max(firing_rates):.2f} Hz")
+# Compare across areas:
+# - VISp vs VISl vs VISrl
+# - Which area has highest mean FR?
+# - Which area has most variable responses?
 ```
 
-### Deliverable
-- `results/figures/01_spike_raster.png` - Spike raster plots
-- `data/session_summary.csv` - Table of 3-5 candidate sessions
-
-**Progress: ⬜ Not started**
+**Deliverable**: 
+- Firing rate statistics table (brain area × stimulus type)
+- Comparative plots (box plots, violin plots)
+- Written interpretation: What does firing pattern tell us?
 
 ---
 
-## Week 2: Firing Rate Analysis & Stimulus Response (May 8-14)
+## Week 3: Orientation Tuning & Selectivity (May 9-15)
 
-### Learning Outcomes
-- Compute firing rates during different stimulus conditions
-- Understand stimulus-response relationships
-- Compare responses across brain areas
-- Identify responsive vs non-responsive neurons
+### Objectives
+- Construct orientation tuning curves
+- Quantify tuning selectivity
+- Identify orientation-selective neurons
+- Compare tuning properties across areas
 
 ### Tasks
-- [ ] Extract drifting grating stimulus parameters
-- [ ] Compute mean firing rate per orientation
-- [ ] Create tuning curves (prelim - just firing vs orientation)
-- [ ] Compare VISp vs VISl vs VISpm response properties
-- [ ] Identify "responsive" neurons (significant modulation)
+- [ ] Notebook: 04_orientation_tuning.ipynb
+- [ ] Notebook: 05_tuning_selectivity.ipynb
+- [ ] Analyze: Find most tuned neurons in each area
+- [ ] Create: Tuning curve plots for representative neurons
 
-### Code Template
-
+### Code Tasks
 ```python
-# Get stimulus data
-stim_table = session.get_stimulus_table('drifting_gratings')
-spike_times = session.spike_times
-unit_ids = session.units.index.values
+# Week 3 Challenge: Orientation tuning analysis
 
-# For each unit, compute firing rate per orientation
-orientations = stim_table['orientation'].unique()
-firing_by_orientation = {}
+# For drifting grating stimulus:
+# 1. Extract responses to each orientation (0°-360°)
+# 2. Compute mean firing rate per orientation
+# 3. Fit Gaussian to tuning curve
+# 4. Calculate: Tuning width, preferred orientation, DSI (direction selectivity)
 
-for unit_id in unit_ids[:20]:  # First 20 units
-    response = []
-    
-    for orientation in sorted(orientations):
-        # Get trials with this orientation
-        trials = stim_table[stim_table['orientation'] == orientation]
-        
-        # Count spikes during these trials
-        spike_counts = []
-        for idx, trial in trials.iterrows():
-            start = trial['start_time']
-            end = trial['stop_time']
-            spikes = spike_times[unit_id]
-            count = np.sum((spikes >= start) & (spikes <= end))
-            spike_counts.append(count)
-        
-        mean_rate = np.mean(spike_counts) / (trials.iloc[0]['stop_time'] - trials.iloc[0]['start_time'])
-        response.append(mean_rate)
-    
-    firing_by_orientation[unit_id] = response
+# Metrics to compute:
+# - Orientation Selectivity Index (OSI)
+# - Direction Selectivity Index (DSI)
+# - Tuning width (FWHM)
+# - Response reliability (SNR)
 
-# Plot tuning curves
-fig, axes = plt.subplots(2, 2, figsize=(10, 10))
-for idx, (unit_id, response) in enumerate(list(firing_by_orientation.items())[:4]):
-    ax = axes.flat[idx]
-    ax.plot(sorted(orientations), response, 'o-', linewidth=2, markersize=6)
-    ax.set_xlabel('Orientation (°)')
-    ax.set_ylabel('Firing Rate (Hz)')
-    ax.set_title(f'Unit {unit_id}')
-
-plt.tight_layout()
-plt.savefig('results/figures/02_tuning_curves_preliminary.png', dpi=150)
-plt.close()
+# Questions:
+# - What % neurons are significantly tuned?
+# - How does tuning differ between V1 vs higher areas?
 ```
 
-### Deliverable
-- `results/figures/02_tuning_curves_preliminary.png` - Tuning curves for sample units
-- `results/data/firing_rates_by_condition.csv` - Compiled firing rates
-
-**Progress: ⬜ Not started**
+**Deliverable**: 
+- Orientation tuning curves for 10+ representative neurons
+- Scatter plots: OSI vs firing rate, DSI vs brain area
+- Summary statistics: % tuned neurons by area
+- Heatmap: Tuning properties across neurons
 
 ---
 
-## Week 3: Orientation Tuning Analysis (May 15-21)
+## Week 4: Population Coding & Information Analysis (May 16-22)
 
-### Learning Outcomes
-- Quantify tuning curve properties (peak, bandwidth, selectivity)
-- Compute information content (bits/spike)
-- Understand neural coding efficiency
-- Compare tuning across cortical areas
-
-### Tasks
-- [ ] Compute proper tuning curves with confidence intervals
-- [ ] Calculate orientation selectivity index (OSI)
-- [ ] Compute direction selectivity index (if moving bars)
-- [ ] Estimate information content (mutual information)
-- [ ] Create summary statistics table
-
-### Code Template
-
-```python
-from scipy.stats import circmean, circstd
-from scipy.special import i0
-
-def compute_orientation_selectivity(mean_response, sem_response, orientations):
-    """Compute OSI following standard neuroscience methods"""
-    # Convert to radians
-    ori_rad = np.radians(orientations * 2)  # Double because 180°=0°
-    
-    # Circular mean direction
-    preferred_ori = circmean(ori_rad, weights=mean_response)
-    
-    # OSI = (Rpref - Rorth) / (Rpref + Rorth)
-    # where Rpref is response at preferred orientation
-    # and Rorth is response at orthogonal orientation
-    
-    pref_response = mean_response[np.argmin(np.abs(ori_rad - preferred_ori))]
-    orth_idx = (np.abs(ori_rad - (preferred_ori + np.pi/2)) % np.pi).argmin()
-    orth_response = mean_response[orth_idx]
-    
-    osi = (pref_response - orth_response) / (pref_response + orth_response + 1e-6)
-    
-    return osi, preferred_ori
-
-# Compute for all units
-osi_values = []
-pref_orientations = []
-
-for unit_id in unit_ids:
-    mean_response = firing_by_orientation[unit_id]
-    osi, pref_ori = compute_orientation_selectivity(
-        np.array(mean_response), 
-        np.zeros_like(mean_response),  # Would have SEM from real data
-        sorted(orientations)
-    )
-    osi_values.append(osi)
-    pref_orientations.append(np.degrees(pref_ori))
-
-# Statistics
-print(f"Mean OSI: {np.mean(osi_values):.3f}")
-print(f"Selective units (OSI > 0.5): {np.sum(np.array(osi_values) > 0.5)}/{len(osi_values)}")
-```
-
-### Deliverable
-- `results/figures/03_tuning_statistics.png` - OSI distributions
-- `results/data/tuning_properties.csv` - OSI, preferred orientation for all units
-
-**Progress: ⬜ Not started**
-
----
-
-## Week 4: Population Coding & Cross-area Comparison (May 22-28)
-
-### Learning Outcomes
-- Understand population-level encoding
-- Compare coding efficiency across brain areas
-- Identify which areas represent visual information best
-- Quantify information redundancy
+### Objectives
+- Analyze population-level coding properties
+- Compute decoding accuracy (stimulus from population)
+- Quantify redundancy vs synergy
+- Understand population geometry
 
 ### Tasks
-- [ ] Compute population firing vectors per stimulus
-- [ ] Decode orientation from population activity
-- [ ] Calculate decoding accuracy per brain area
-- [ ] Quantify population information content
-- [ ] Create comparison plots (VISp vs VISl vs VISpm)
+- [ ] Notebook: 06_population_decoding.ipynb
+- [ ] Notebook: 07_information_theory.ipynb
+- [ ] Implement: Simple linear decoder (stimulus angle → population)
+- [ ] Analyze: How many neurons needed for reliable decoding?
 
-### Code Template
-
+### Code Tasks
 ```python
+# Week 4 Challenge: Population coding analysis
+
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_val_score
-import pandas as pd
 
-def decode_orientation(spike_data, stimuli, cv=5):
-    """
-    Decode stimulus orientation from population spike counts
-    
-    spike_data: (n_trials, n_neurons) array
-    stimuli: (n_trials,) array of orientations
-    """
-    clf = LogisticRegression(multi_class='multinomial', max_iter=1000)
-    scores = cross_val_score(clf, spike_data, stimuli, cv=cv, scoring='accuracy')
-    return np.mean(scores), np.std(scores)
+# Construct population response matrix:
+# Rows: trials
+# Columns: neuron firing rates
+# Target: stimulus orientation
 
-# Get population activity for each brain area
-brain_areas = session.units['brain_area'].unique()
-decoding_results = {}
+X = construct_population_response(session, neurons)
+y = stimulus_orientations
 
-for area in brain_areas:
-    # Get units in this area
-    area_units = session.units[session.units['brain_area'] == area].index
-    
-    # Prepare trial data
-    stim_table = session.get_stimulus_table('drifting_gratings')
-    spike_times = session.spike_times
-    
-    spike_matrix = []
-    orientations = []
-    
-    for idx, trial in stim_table.iterrows():
-        start = trial['start_time']
-        end = trial['stop_time']
-        
-        trial_spikes = []
-        for unit_id in area_units:
-            spikes = spike_times[unit_id]
-            count = np.sum((spikes >= start) & (spikes <= end))
-            trial_spikes.append(count)
-        
-        spike_matrix.append(trial_spikes)
-        orientations.append(trial['orientation'])
-    
-    spike_matrix = np.array(spike_matrix)
-    orientations = np.array(orientations)
-    
-    # Decode
-    accuracy, std = decode_orientation(spike_matrix, orientations)
-    decoding_results[area] = {'accuracy': accuracy, 'std': std, 'n_units': len(area_units)}
+# Decoding:
+# 1. Train linear classifier (population → stimulus)
+# 2. Cross-validate accuracy
+# 3. Vary neuron count: how many needed for 80% accuracy?
+# 4. Compare: V1 vs higher area decoding performance
 
-# Summary
-result_df = pd.DataFrame(decoding_results).T
-print(result_df)
+# Information theory:
+# - Mutual information (stimulus & population)
+# - Redundancy & synergy
+# - Information per neuron
 ```
 
-### Deliverable
-- `results/figures/04_decoding_accuracy.png` - Cross-area comparison
-- `results/data/population_coding.csv` - Decoding accuracies per area
-
-**Progress: ⬜ Not started**
+**Deliverable**: 
+- Decoding accuracy curves (% correct vs neurons used)
+- Comparison: V1 vs other areas decoding capability
+- Information summary: bits per neuron by area
+- Interpretation: What does population tell us about coding?
 
 ---
 
-## Week 5: Synthesis & Bridge to Transcriptomics (May 29-31)
+## Week 5: Synthesis & Spatial Transcriptomics Integration (May 23-31)
 
-### Learning Outcomes
-- Synthesize findings into narrative
-- Identify candidate neurons for transcriptomics
-- Create publication-quality figures
-- Plan next research steps
+### Objectives
+- Synthesize 5 weeks of findings
+- Create comprehensive results report
+- Plan integration with spatial transcriptomics
+- Prepare for next research phase
 
 ### Tasks
-- [ ] Write 2-page summary of findings
-- [ ] Create final figure set (3-4 high-quality plots)
-- [ ] Identify "high-value" neurons (high information content, selective)
-- [ ] Create candidate list with metadata
-- [ ] Plan how to target these neurons for sequencing
+- [ ] Notebook: 08_comprehensive_analysis.ipynb (all previous steps)
+- [ ] Notebook: 09_results_summary.ipynb
+- [ ] Create: Publication-quality figures (4-6 key plots)
+- [ ] Write: 2-page results summary
+- [ ] Plan: How to integrate with scRNA-seq data
 
-### Code Template
-
+### Code Tasks
 ```python
-# Create summary figure
-fig = plt.figure(figsize=(16, 10))
+# Week 5 Challenge: Complete integrated analysis
 
-# 1. Example tuning curves (top left)
-ax1 = plt.subplot(2, 3, 1)
-# Plot best tuning curve...
+# Capstone workflow:
+# 1. Load multi-area session
+# 2. Full preprocessing: unit filtering, response extraction
+# 3. Firing rate analysis
+# 4. Orientation tuning (if available)
+# 5. Population decoding
+# 6. Cross-area comparison
+# 7. Generate summary statistics
 
-# 2. OSI distribution (top middle)
-ax2 = plt.subplot(2, 3, 2)
-ax2.hist(osi_values, bins=30, color='steelblue', edgecolor='black')
-ax2.set_xlabel('Orientation Selectivity Index')
-ax2.set_ylabel('Number of Units')
+# Create results document:
+# - Session metadata
+# - Number of neurons per area
+# - Key findings (tuning, decoding, etc.)
+# - Comparison to literature values
+# - High-quality visualizations
 
-# 3. Decoding accuracy (top right)
-ax3 = plt.subplot(2, 3, 3)
-areas = list(decoding_results.keys())
-accuracies = [decoding_results[a]['accuracy'] for a in areas]
-ax3.bar(areas, accuracies, color='coral', edgecolor='black')
-ax3.set_ylabel('Decoding Accuracy')
-ax3.set_ylim([0, 1])
-
-# Continue for lower panels...
-
-plt.tight_layout()
-plt.savefig('results/figures/05_summary_figure.png', dpi=300, bbox_inches='tight')
-plt.close()
-
-# Create candidate neuron list
-candidates = pd.DataFrame({
-    'unit_id': unit_ids,
-    'brain_area': [session.units.loc[u, 'brain_area'] for u in unit_ids],
-    'firing_rate': firing_rates,
-    'osi': osi_values,
-    'information_content': info_values,  # Computed earlier
-    'preferred_orientation': pref_orientations
-})
-
-candidates = candidates.sort_values('information_content', ascending=False)
-candidates.to_csv('results/data/high_value_neurons.csv', index=False)
-
-print(f"Top 20 candidates identified:")
-print(candidates.head(20))
+# Plan integration:
+# - Which neurons to look up in scRNA-seq?
+# - What cell types might show orientation selectivity?
+# - How to link electrophysiology → transcriptomics?
 ```
 
-### Deliverable
-- `ANALYSIS_SUMMARY.md` - 2-page written summary
-- `results/figures/05_summary_figure.png` - Publication-quality summary
-- `results/data/high_value_neurons.csv` - Candidates for transcriptomics
-
-**Progress: ⬜ Not started**
-
----
-
-## Success Criteria by May 31
-
-✅ Loaded and explored Allen Brain Observatory data  
-✅ Computed firing rates and tuning curves  
-✅ Quantified orientation selectivity  
-✅ Performed population decoding  
-✅ Identified candidate neurons for transcriptomics  
-✅ 5+ publication-ready figures created  
+**Deliverable**: 
+- Complete analysis notebook (reproducible, well-commented)
+- Figure package (4-6 publication-ready plots):
+  - Firing rate comparison across areas
+  - Orientation tuning examples
+  - Population decoding accuracy
+  - Information content summary
+- 2-page results write-up with:
+  - Key findings
+  - Biological interpretation
+  - Connections to transcriptomics
+- GitHub commit log showing progress (at least 1 commit/week)
 
 ---
 
-## Integration with RNA-seq Learning
+## Success Criteria
 
-By end of May, you'll have:
+By May 31, you should be able to:
 
-**From neural coding:**
-- High-information neurons identified
-- Brain areas ranked by coding efficiency
-- Cell types (from metadata) associated with best encoding
-
-**From RNA-seq learning:**
-- Complete Scanpy workflow mastery
-- Understanding of single-cell data analysis
-
-**June onwards:** Combine them!
+- [ ] Load Allen Brain Observatory data from any session
+- [ ] Extract and visualize spike trains
+- [ ] Compute firing rates and compare across areas
+- [ ] Construct and interpret orientation tuning curves
+- [ ] Implement population decoding (stimulus from neural activity)
+- [ ] Calculate information-theoretic metrics
+- [ ] Interpret results in context of visual neuroscience
+- [ ] Create publication-quality visualizations
+- [ ] Link neural coding to molecular (transcriptomics) data
 
 ---
 
-## File Organization
+## Weekly Schedule Template
 
+### Daily (45-60 min)
 ```
-neural-coding-visual-cortex/
-├── data/
-│   ├── ecephys_cache/           # Allen data
-│   └── session_summary.csv      # Week 1 output
-├── notebooks/
-│   ├── 01_data_exploration.ipynb
-│   ├── 02_firing_rates.ipynb
-│   ├── 03_tuning_analysis.ipynb
-│   ├── 04_population_decoding.ipynb
-│   └── 05_synthesis.ipynb
-└── results/
-    ├── figures/
-    │   ├── 01_spike_raster.png
-    │   ├── 02_tuning_curves_preliminary.png
-    │   ├── 03_tuning_statistics.png
-    │   ├── 04_decoding_accuracy.png
-    │   └── 05_summary_figure.png
-    └── data/
-        ├── firing_rates_by_condition.csv
-        ├── tuning_properties.csv
-        ├── population_coding.csv
-        └── high_value_neurons.csv
+Monday-Wednesday:
+- 15 min: Review previous week concept
+- 30 min: Write analysis code
+- 15 min: Test & debug
+
+Thursday:
+- 45 min: Complete weekly analysis task
+- 15 min: Create visualization
+
+Friday:
+- 30 min: Interpret results
+- 15 min: Write summary notes
+- 15 min: Plan next week
 ```
 
 ---
 
-Good luck! You've got 36 days to make this work. 🧠⚡
+## Key Concepts by Week
 
+| Week | Concept | Why It Matters |
+|------|---------|----------------|
+| 1 | Spike data structure | Foundation for all analysis |
+| 2 | Firing rates | Basic neural response metric |
+| 3 | Orientation tuning | Measure neural selectivity |
+| 4 | Population coding | Information representation |
+| 5 | Integration | Connect to transcriptomics |
+
+---
+
+## Data Organization
+
+```
+results/
+├── week1_exploration/
+│   ├── session_summary.csv
+│   └── spike_rasters.png
+├── week2_firing_rates/
+│   ├── firing_rate_stats.csv
+│   └── area_comparison.png
+├── week3_tuning/
+│   ├── tuning_curves.png
+│   ├── osi_dsi_stats.csv
+│   └── tuned_neurons.txt
+├── week4_population/
+│   ├── decoding_curves.png
+│   ├── information_summary.csv
+│   └── population_analysis.png
+└── week5_synthesis/
+    ├── comprehensive_results.md
+    ├── publication_figures/
+    └── final_report.pdf
+```
+
+---
+
+## Troubleshooting
+
+| Challenge | Solution |
+|-----------|----------|
+| Data download too slow | Check internet, use different session |
+| Memory issues | Process fewer neurons per session |
+| Tuning curves look weird | Check stimulus parameters, response window |
+| Decoding accuracy too low | Try more neurons, different classifier |
+| "Don't understand why result makes sense" | Check neuroscience background reading |
+
+---
+
+## Resources
+
+### Papers to Reference
+- **Allen Brain Observatory paper**: Nature 2021
+- **Visual cortex encoding**: Schrader et al., Nature Neuroscience
+- **Population coding**: Gross et al., recent reviews
+
+### Code References
+- AllenSDK documentation
+- scikit-learn for decoding
+- Information theory packages (optional)
+
+---
+
+## Tracking Progress
+
+Update weekly:
+
+**Week 1 Completion**: ___ / 5 tasks | Confidence: ___ / 10
+**Week 2 Completion**: ___ / 4 tasks | Confidence: ___ / 10
+**Week 3 Completion**: ___ / 4 tasks | Confidence: ___ / 10
+**Week 4 Completion**: ___ / 4 tasks | Confidence: ___ / 10
+**Week 5 Completion**: ___ / 5 tasks | Confidence: ___ / 10
+
+**Most interesting finding so far**: ...
+
+**Ready for transcriptomics integration**: Yes / No
